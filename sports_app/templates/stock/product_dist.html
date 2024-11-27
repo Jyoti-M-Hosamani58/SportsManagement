@@ -1,0 +1,572 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="Untree.co" />
+    <link rel="shortcut icon" href="{% static 'favicon.png' %}" />
+
+    <meta name="description" content="" />
+    <meta name="keywords" content="bootstrap, bootstrap5" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="{% static 'fonts/icomoon/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'fonts/flaticon/font/flaticon.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/tiny-slider.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/aos.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+
+    <title>Consignment</title>
+    <style>
+        .suggestions-box {
+            border: 1px solid #ddd;
+            max-height: 150px;
+            overflow-y: auto;
+            background-color: white;
+            position: absolute;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .suggestions-box ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .suggestions-box li {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .suggestions-box li:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="site-mobile-menu site-navbar-target">
+        <div class="site-mobile-menu-header">
+            <div class="site-mobile-menu-close">
+                <span class="icofont-close js-menu-toggle"></span>
+            </div>
+        </div>
+        <div class="site-mobile-menu-body"></div>
+    </div>
+
+    {% include 'nav.html' %}
+    <br><br><br>
+
+    <br><br><br><br><br><br>
+    <style>
+        /* Basic styling for the table */
+        .table-container {
+            overflow-x: auto; /* Allows horizontal scrolling if the table is too wide */
+            margin-bottom: 20px; /* Adds space below the table */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        /* Basic styling for the search input */
+        #branchSearch {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+        /* Styling for the grid layout */
+        .details-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+            padding: 16px;
+        }
+        .details-item, .product-item {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 12px;
+            background-color: #f9f9f9;
+        }
+        .details-item p, .product-item p {
+            margin: 0;
+        }
+        .details-item .label, .product-item .label {
+            font-weight: bold;
+        }
+        /* Styling for the product details */
+        .product-details-container {
+            margin-top: 10px;
+        }
+        /* Additional styling to make the form and dropdown consistent */
+        form {
+            margin-bottom: 20px;
+        }
+        select {
+            padding: 4px;
+            margin-top: 4px;
+            width: 20%;
+        }
+        /* Styling for quantity input and total cost */
+        #quantity {
+            padding: 4px;
+            margin-top: 4px;
+            width: 100px;
+        }
+        #totalCost {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        #updatedBalance {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .details-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 columns, evenly spaced */
+    gap: 20px; /* space between form fields */
+}
+
+.details-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.label {
+    margin-bottom: 5px;
+}
+
+input[type="text"] {
+    padding: 8px;
+    width: 100%;
+    box-sizing: border-box; /* ensures padding doesn't overflow input box */
+}
+.product-details {
+    display: flex;
+    align-items: center;
+    gap: 15px;  /* Add space between items */
+}
+
+.product-details label {
+    margin-right: 5px;  /* Space between label and input */
+}
+
+.product-details input {
+    padding: 8px;
+    width: auto;  /* Adjust input width based on content */
+}
+
+#addProductBtn {
+    padding: 8px 12px;
+}
+
+    </style>
+    <script>
+        // Show suggestions based on entered product name
+function shownameDatalist() {
+    const input = document.getElementById('name');
+    const datalist = document.getElementById('name_list');
+
+    if (input.value.length >= 2) {
+        fetch(`/get_name?query=${encodeURIComponent(input.value)}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Fetched data:', data); // Debugging: Check the data in the console
+                datalist.innerHTML = ''; // Clear previous options
+
+                if (Array.isArray(data) && data.length > 0) {
+                    data.forEach(item => {
+                        const option = document.createElement('option');
+                        option.value = item; // The returned value should be a string (kit_name)
+                        datalist.appendChild(option);
+                    });
+                } else {
+                    const option = document.createElement('option');
+                    option.value = 'No results';
+                    datalist.appendChild(option);
+                }
+            })
+            .catch(error => console.error('Error fetching items:', error));
+    } else {
+        datalist.innerHTML = ''; // Clear the datalist if fewer than 2 characters
+    }
+}
+function fetchnameDetails() {
+    const name = document.getElementById('name').value;
+
+    if (name) {
+        // Fetch player details from the backend
+        fetch(`/get_name_details?name=${encodeURIComponent(name)}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Fetched player details:', data); // Debugging: Log the fetched data
+
+                if (data.error) {
+                    alert(data.error);  // Show error if the player is not found
+                } else {
+                    // Populate the form fields with the fetched data
+                    document.getElementById('admission_no_input').value = data.admission_no;
+                    document.getElementById('dob_input').value = data.dob;
+                    document.getElementById('player_name_input').value = data.name;
+                    document.getElementById('phone_input').value = data.phone;
+                    document.getElementById('package_input').value = data.package;
+                    document.getElementById('sessions_input').value = data.sessions;
+                    document.getElementById('batchtime_input').value = data.batchtime;
+                    document.getElementById('aadhar_input').value = data.aadhar;
+                    document.getElementById('place_input').value = data.place;
+                    document.getElementById('address_input').value = data.address;
+                    document.getElementById('balance_input').value = data.balance;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching player details:', error);
+                alert('An error occurred while fetching player details.');
+            });
+    }
+}
+
+    </script>
+</head>
+<body>
+<div class="container">
+        <h1 style="text-align: center;">Product Distribution</h1>
+    <form method="post" action="" id="get_item_name">
+        <label for="name">Select a player:</label>
+        <input type="text" id="name" name="name" class="form-control"  list="name_list" oninput="shownameDatalist()" onchange="fetchnameDetails()">
+    <datalist id="name_list"></datalist></br> <!-- Container for the suggestions -->
+
+
+      <div class="details-container">
+    <div class="details-item">
+        <label class="label" for="admission_no">Admission No:</label>
+        <input type="text" id="admission_no_input" name="admission_no" value="{{ details.admission_no }}" readonly>
+    </div>
+    <div class="details-item">
+        <label class="label" for="dob">Date of Birth:</label>
+        <input type="text" id="dob_input" name="dob" value="{{ details.dob }}" readonly>
+    </div>
+    <div class="details-item">
+        <label class="label" for="player_name">Player Name:</label>
+        <input type="text" id="player_name_input" name="playername" value="{{ details.name }}" readonly>
+    </div>
+    <div class="details-item">
+        <label class="label" for="phone">Phone:</label>
+        <input type="text" id="phone_input" name="phone" value="{{ details.phone }}" readonly>
+    </div>
+          <div class="details-item">
+        <label class="label" for="aadhar">Aadhar No:</label>
+        <input type="text" id="aadhar_input" name="aadhar" value="{{ details.aadhar }}" readonly>
+    </div>
+          <div class="details-item">
+        <label class="label" for="place">Place:</label>
+        <input type="text" id="place_input" name="place" value="{{ details.place }}" readonly>
+    </div>
+           <div class="details-item">
+        <label class="label" for="address">Address:</label>
+        <input type="text" id="address_input" name="address" value="{{ details.address }}" readonly>
+    </div>
+           <div class="details-item">
+        <label class="label" for="balance">Balance:</label>
+        <input type="text" id="balance_input" name="balance" value="{{ details.balance }}" readonly>
+    </div>
+
+    <div class="details-item">
+        <label class="label" for="package">Package:</label>
+        <input type="text" id="package_input" name="package" value="{{ details.package }}" readonly>
+    </div>
+    <div class="details-item">
+        <label class="label" for="sessions">Sessions:</label>
+        <input type="text" id="sessions_input" name="sessions" value="{{ details.sessions }}" readonly>
+    </div>
+    <div class="details-item">
+        <label class="label" for="batchtime">Batch Time:</label>
+        <input type="text" id="batchtime_input" name="batchtime" value="{{ details.batchtime }}" readonly>
+    </div>
+</div>
+
+</div>
+
+<div class="container">
+    {% csrf_token %}
+    <label for="product_name">Item Name:</label>
+<input type="text" id="product_name" name="product_name" class="form-control" placeholder="Item Name" list="item_name" oninput="showitemnameDatalist()" onchange="fetchitemDetails()">
+<datalist id="item_name"></datalist></br> <!-- Container for the suggestions -->
+
+<div class="product-details">
+    <label for="quantity">Quantity:</label>
+    <input type="number" id="quantity" name="quantity" min="1" value="1" oninput="calculateTotalCost()" required>
+
+    <label for="price_per_unit">Price per Unit:</label>
+    <input type="text" id="price_per_unit" name="price_per_unit" disabled>  <!-- Price fetched from Store -->
+
+    <label for="total_cost">Total Cost:</label>
+    <input type="text" id="total_cost" name="total_cost" disabled>
+
+    <input type="hidden" id="id" name="id" disabled>  <!-- Hidden product ID field -->
+
+    <button type="button" id="addProductBtn" onclick="addProductToList()">Add Product</button>
+</div>
+
+<h3>Added Products</h3>
+<!-- Product List Table -->
+<table id="addedProductsList">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Product Name</th>
+            <th>Price per Unit</th>
+            <th>Quantity</th>
+            <th>Total Cost</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Product rows will be added dynamically here -->
+    </tbody>
+</table>
+
+    <div>
+        <p><strong>Grand Total:</strong> <span id="grandTotal">0.00</span></p>
+    </div>
+<input type="hidden" name="products" value="[...JSON Data...]">
+
+    <button type="submit">Save</button>
+</form>
+</div>
+</div>
+
+    <script>
+    // Show suggestions based on entered product name
+function showitemnameDatalist() {
+    const input = document.getElementById('product_name');
+    const datalist = document.getElementById('item_name');
+
+    if (input.value.length >= 2) {
+        fetch(`/get_item_name?query=${encodeURIComponent(input.value)}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Fetched data:', data); // Debugging: Check the data in the console
+                datalist.innerHTML = ''; // Clear previous options
+
+                if (Array.isArray(data) && data.length > 0) {
+                    data.forEach(item => {
+                        const option = document.createElement('option');
+                        option.value = item; // The returned value should be a string (kit_name)
+                        datalist.appendChild(option);
+                    });
+                } else {
+                    const option = document.createElement('option');
+                    option.value = 'No results';
+                    datalist.appendChild(option);
+                }
+            })
+            .catch(error => console.error('Error fetching items:', error));
+    } else {
+        datalist.innerHTML = ''; // Clear the datalist if fewer than 2 characters
+    }
+}
+// Fetch item details when a product name is selected or entered
+function fetchitemDetails() {
+    const product_name = document.getElementById('product_name').value;
+
+    if (product_name) {
+        fetch(`/get_item_details?name=${encodeURIComponent(product_name)}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Fetched item details:', data); // Debugging: Check the data in the console
+
+                if (data.id) {
+                    // Store the product id and price per unit
+                    document.getElementById('price_per_unit').value = data.price_per_unit || '0.00';
+                    document.getElementById('id').value = data.id;  // Store the product ID for later use
+                    calculateTotalCost();  // Recalculate total cost based on quantity
+                } else {
+                    alert("Item not found!");
+                }
+            })
+            .catch(error => console.error('Error fetching item details:', error));
+    }
+}
+
+
+// Calculate total cost based on quantity and price
+function calculateTotalCost() {
+    const quantity = document.getElementById('quantity').value || 1;
+    const price_per_unit = document.getElementById('price_per_unit').value || 0;
+
+    const total_cost = (quantity * price_per_unit).toFixed(2);
+    document.getElementById('total_cost').value = total_cost;
+
+    // Update grand total (optional to show it in real-time)
+    updateGrandTotal();
+}
+function addProductToList() {
+    // Retrieve values from form fields
+    const product_name = document.getElementById('product_name').value;
+    const price_per_unit = parseFloat(document.getElementById('price_per_unit').value);
+    const quantity = parseInt(document.getElementById('quantity').value) || 1;
+    const total_cost = parseFloat(document.getElementById('total_cost').value) || (price_per_unit * quantity);
+    const product_id = document.getElementById('id').value;  // Fetch product ID from hidden field
+
+    // Check if all fields are filled correctly
+    if (!product_name || !price_per_unit || !product_id || isNaN(quantity) || isNaN(total_cost)) {
+        alert("Please fill all fields correctly.");
+        return;
+    }
+
+    // Find the table where products are listed
+    const table = document.getElementById('addedProductsList').getElementsByTagName('tbody')[0];
+
+    // Create a new row
+    const row = table.insertRow();
+    row.setAttribute('data-product-id', product_id);  // Set a custom data attribute for product ID
+
+    // Add cells with product data
+    row.innerHTML = `
+        <td>${product_id}</td>
+        <td>${product_name}</td>
+        <td>${price_per_unit.toFixed(2)}</td>
+        <td>${quantity}</td>
+        <td>${total_cost.toFixed(2)}</td>
+        <td><button onclick="removeProductFromList(this)">Remove</button></td>
+    `;
+
+    // Clear input fields after adding the product
+    document.getElementById('product_name').value = '';
+    document.getElementById('quantity').value = 1;
+    document.getElementById('price_per_unit').value = '';
+    document.getElementById('total_cost').value = '';
+    document.getElementById('id').value = '';  // Reset the hidden product ID field
+}
+
+// Function to remove a product from the list
+function removeProductFromList(button) {
+    const row = button.closest('tr');  // Get the closest row (tr) element
+    row.remove();  // Remove the row from the table
+}
+
+function collectProductDetails() {
+    const products = [];
+    const rows = document.querySelectorAll("#addedProductsList tbody tr");
+
+    rows.forEach((row) => {
+        const product_id = row.cells[0].textContent;  // Get product ID from the table
+        const product_name = row.cells[1].textContent;  // Get product name from the table
+        const price_per_unit = parseFloat(row.cells[2].textContent);
+        const quantity = parseInt(row.cells[3].textContent);
+        const total_cost = parseFloat(row.cells[4].textContent);
+
+        products.push({
+            id: product_id,
+            product_name: product_name,
+            price_per_unit: price_per_unit,
+            quantity: quantity,
+            total_cost: total_cost
+        });
+    });
+
+    return products;
+}
+
+// Submit the form with both player and product details
+function submitForm(event) {
+    event.preventDefault();
+
+    const products = collectProductDetails();  // Collect product details
+
+    if (products.length === 0) {
+        alert("No products added.");
+        return;
+    }
+
+    // Collect player details
+    const playerDetails = {
+        admission_no: document.getElementById('admission_no_input').value,
+        dob: document.getElementById('dob_input').value,
+        player_name: document.getElementById('player_name_input').value,
+        phone: document.getElementById('phone_input').value,
+        package: document.getElementById('package_input').value,
+        sessions: document.getElementById('sessions_input').value,
+        batchtime: document.getElementById('batchtime_input').value,
+        aadhar: document.getElementById('aadhar_input').value,
+        place: document.getElementById('place_input').value,
+        address: document.getElementById('address_input').value,
+        balance: document.getElementById('balance_input').value
+    };
+
+    // Prepare the data to send to the backend
+    const formData = new FormData(document.getElementById('get_item_name'));
+    formData.append('playerDetails', JSON.stringify(playerDetails));
+    formData.append('products', JSON.stringify(products));
+
+    // Send the data to the backend via AJAX (POST request)
+    fetch('/save_sale', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // If the sale is successful, redirect to the dist_receipt page with the receipt number
+            window.location.href = `/dist_receipt/${data.receipt}/`;  // Use the receipt number from the response
+        } else {
+            alert("Error saving sale: " + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert("An error occurred while saving the sale.");
+    });
+}
+
+// Attach the submit event to the form
+document.querySelector("button[type='submit']").addEventListener('click', submitForm);
+
+</script>
+  <br><br><br><br><br><br><br><br><br>
+  <div class="row mt-5">
+        <div class="col-12 text-center">
+            <p>
+                Copyright &copy;
+                <script>
+                    document.write(new Date().getFullYear());
+                </script>
+                . All Rights Reserved. <br>&mdash; Designed and Developed By -
+                <a href="https://flowercreeper.com/index.php">FlowerCreeper</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Preloader -->
+    <div id="overlayer"></div>
+    <div class="loader">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/tiny-slider.js' %}"></script>
+    <script src="{% static 'js/aos.js' %}"></script>
+    <script src="{% static 'js/navbar.js' %}"></script>
+    <script src="{% static 'js/counter.js' %}"></script>
+    <script src="{% static 'js/custom.js' %}"></script>
+</body>
+</html>
+
+

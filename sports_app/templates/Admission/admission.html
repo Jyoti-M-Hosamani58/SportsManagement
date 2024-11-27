@@ -1,0 +1,544 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="Untree.co" />
+    <link rel="shortcut icon" href="{% static 'favicon.png' %}" />
+
+    <meta name="description" content="" />
+    <meta name="keywords" content="bootstrap, bootstrap5" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="{% static 'fonts/icomoon/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'fonts/flaticon/font/flaticon.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/tiny-slider.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/aos.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+
+    <title>Admission</title>
+
+    <style>
+        .suggestions-box {
+            border: 1px solid #ddd;
+            max-height: 150px;
+            overflow-y: auto;
+            background-color: white;
+            position: absolute;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .suggestions-box ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .suggestions-box li {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .suggestions-box li:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="site-mobile-menu site-navbar-target">
+        <div class="site-mobile-menu-header">
+            <div class="site-mobile-menu-close">
+                <span class="icofont-close js-menu-toggle"></span>
+            </div>
+        </div>
+        <div class="site-mobile-menu-body"></div>
+    </div>
+
+    {% include 'nav.html' %}
+    <br><br><br><br><br><br>
+
+    <!-- Player Admission Form -->
+    <div class="container">
+        <h2 class="text-center mb-4">Player Admission Form</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="row mb-3">
+                <div class="col-md-3 form-label-group">
+                    <label for="name" class="form-label">Name:</label>
+                    <input type="text" id="name" name="name" class="form-control form-control-small" required>
+                </div>
+                <div class="col-md-3 form-label-group">
+                    <label for="dob" class="form-label">Date of Birth:</label>
+                    <input type="date" class="form-control form-control-small" id="dob" name="dob" onchange="calculateAge()" required>
+                </div>
+                <div class="col-md-3 form-label-group">
+                    <label for="age" class="form-label">Age:</label>
+                    <input type="text" class="form-control form-control-small" id="age" name="age" readonly>
+                </div>
+                <div class="col-md-3 form-label-group">
+                    <label for="gender" class="form-label">Gender:</label>
+                    <select id="gender" name="gender" class="form-control form-control-small" required>
+                        <option>Select</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-3 form-label-group">
+                    <label for="phone" class="form-label">Phone Number:</label>
+                    <input type="tel" id="phone" name="phone" class="form-control form-control-small" required>
+                </div>
+                <div class="col-md-3 form-label-group">
+                    <label for="blood_group" class="form-label">Blood Group:</label>
+                    <input type="text" id="blood_group" name="blood_group" class="form-control form-control-small" required>
+                </div>
+                <div class="col-md-3 form-label-group">
+                    <label for="adhar" class="form-label">Aadhar Number:</label>
+                    <input type="text" id="adhar" name="adhar" class="form-control form-control-small">
+                </div>
+                <div class="col-md-3 form-label-group">
+                    <label for="parentName" class="form-label">Parent/Guardian Full Name:</label>
+                    <input type="text" id="parentName" name="parentName" class="form-control form-control-small" required>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-3 form-label-group">
+                    <label for="mobile" class="form-label">Parent/Guardian Mobile Number:</label>
+                    <input type="tel" id="mobile" name="mobile" class="form-control form-control-small" required>
+                </div>
+                <div class="col-md-3 form-label-group">
+                    <label for="email" class="form-label">Parent/Guardian Email:</label>
+                    <input type="email" id="email" name="email" class="form-control form-control-small">
+                </div>
+                <div class="col-md-3 form-label-group">
+                    <label for="place" class="form-label">Place:</label>
+                    <input type="text" id="place" name="place" class="form-control form-control-small" required>
+                </div>
+                <div class="col-md-3 form-label-group">
+                    <label for="address" class="form-label">Address:</label>
+                    <textarea id="address" name="address" class="form-control form-control-small" rows="2" required></textarea>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-3 form-label-group">
+                    <label for="doj" class="form-label">Date of Joining:</label>
+                    <input type="date" id="doj" name="doj" class="form-control form-control-small" required>
+                </div>
+                <div class="col-md-3 form-label-group">
+                    <label for="uniformSize" class="form-label">Uniform Size:</label>
+                    <select id="uniformSize" name="uniformSize" class="form-control form-control-small" required>
+                        <option>Select</option>
+                        <option value="28">28</option>
+                        <option value="30">30</option>
+                        <option value="32">32</option>
+                        <option value="34">34</option>
+                        <option value="36">36</option>
+                        <option value="38">38</option>
+                        <option value="40">40</option>
+                        <option value="42">42</option>
+                        <option value="44">44</option>
+                        <option value="46">46</option>
+                    </select>
+                </div>
+                <div class="col-md-3 form-label-group">
+                    <label for="uniformColor" class="form-label">Uniform Color:</label>
+                    <select id="uniformColor" name="uniformColor" class="form-control form-control-small" required>
+                        <option>Select</option>
+                        <option value="white">White</option>
+                        <option value="colored">Colored</option>
+                    </select>
+                </div>
+                <div class="col-md-3 form-label-group">
+                    <label for="batchtime" class="form-label">Batch Time:</label>
+                    <select id="batchtime" name="batchtime" class="form-control form-control-small" required>
+                        <option>Select</option>
+                        <option value="Batch 1">6-8am</option>
+                        <option value="Batch 2">8-10am</option>
+                        <option value="Batch 3">4-6pm</option>
+                        <option value="Batch 4">5.30-7.30pm</option>
+                        <option value="Batch 5">7.30-9.30pm</option>
+                    </select>
+                </div>
+            </div>
+
+ <h3>Coach Allocation</h3>
+<div class="row mb-3">
+   <div class="col-md-3">
+<label for="coachType">Coach Name:</label>
+<input type="text" id="coachname" name="coachname" class="form-control" placeholder="Coach Name" required list="coach_name" oninput="showCoachDatalist()" onchange="fetchCoachDetails()">
+    <datalist id="coach_name"></datalist></br> <!-- Container for the suggestions -->
+
+</div>
+
+<div class="col-md-3">
+    <label for="coachType">Coach Type:</label>
+    <input type="text" id="coachType" name="coachType" class="form-control" readonly />
+</div>
+
+</div>
+
+
+
+           <h3 class="text-center mt-4">Academy Package</h3>
+
+<div class="row mb-3">
+    <div class="col-md-3 form-check">
+        <input class="form-check-input" type="radio" name="package" id="packageMonthly" value="monthly" required>
+        <label class="form-check-label" for="packageMonthly">Monthly</label>
+    </div>
+    <div class="col-md-3 form-check">
+        <input class="form-check-input" type="radio" name="package" id="packageQuarterly" value="quarterly">
+        <label class="form-check-label" for="packageQuarterly">Quarterly</label>
+    </div>
+    <div class="col-md-3 form-check">
+        <input class="form-check-input" type="radio" name="package" id="packageHalfYearly" value="half_yearly">
+        <label class="form-check-label" for="packageHalfYearly">Half-Yearly</label>
+    </div>
+    <div class="col-md-3 form-check">
+        <input class="form-check-input" type="radio" name="package" id="packageYearly" value="yearly">
+        <label class="form-check-label" for="packageYearly">Yearly</label>
+    </div>
+</div>
+
+<div id="sessionsOptions" class="row mb-3" style="display: none;">
+    <div class="col-md-3 form-check">
+        <input class="form-check-input" type="radio" name="sessions" id="sessions2" value="weekly_2" required>
+        <label class="form-check-label" for="sessions2">2 Sessions/Week</label>
+    </div>
+    <div class="col-md-3 form-check">
+        <input class="form-check-input" type="radio" name="sessions" id="sessions3" value="weekly_3">
+        <label class="form-check-label" for="sessions3">3 Sessions/Week</label>
+    </div>
+    <div class="col-md-3 form-check">
+        <input class="form-check-input" type="radio" name="sessions" id="sessions6" value="weekly_6">
+        <label class="form-check-label" for="sessions6">6 Sessions/Week</label>
+    </div>
+</div>
+
+<div class="row mb-3" id="registrationFeeSection" style="display:none;">
+    <div class="col-md-3 form-label-group">
+        <label for="registration_fee" class="form-label">Registration Fee:</label>
+        <input type="number" id="registration_fee" name="registration_fee" class="form-control form-control-small" required>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-3 form-label-group">
+        <label for="totalAmount" class="form-label">Total Amount:</label>
+        <input type="number" id="totalAmount" name="totalAmount" class="form-control form-control-small">
+    </div>
+    <div class="col-md-3 form-label-group">
+        <label for="payment" class="form-label">Payment Amount:</label>
+        <input type="number" id="payment" name="payment" class="form-control form-control-small">
+    </div>
+    <div class="col-md-3 form-label-group">
+        <label for="balance" class="form-label">Balance:</label>
+        <input type="number" id="balance" name="balance" class="form-control form-control-small" readonly>
+    </div>
+</div>
+
+
+            <h1 class="text-center mt-4">Payment Mode</h1>
+    <div class="row">
+        <div class="col-md-3 form-label-group">
+            <label>Payment Mode:</label>
+            <select id="paymentMode" name="paymentMode" class="form-control form-control-sm" onchange="togglePaymentDetails()">
+                <option value="">Select</option>
+                <option value="cash">Cash</option>
+                <option value="bank_transfer">Bank Transfer</option>
+                <option value="upi">UPI</option>
+                <option value="phonepay">PhonePay</option>
+            </select>
+        </div>
+         <div class="col-md-3 form-label-group">
+            <label>Payment Status:</label>
+            <select name="payment1" id="payment1" class="form-control form-control-sm">
+                <option value="">-- Select --</option>
+                <option value="paid">Paid</option>
+                <option value="unpaid">Unpaid</option>
+            </select>
+
+    </div>
+    </div>
+
+        <div class="col-md-3 form-label-group" id="paymentDetails"></div>
+    </div>
+
+    <div>
+
+
+        <div class="col-md-12">
+            <div  class="row">
+                <div class="col-md-3">
+                    <div id="bankTransferFields"  style="display:none;">
+        <div class=" form-label-group">
+            <label for="accountholder" class="form-label">Account Holder Name:</label>
+            <input type="text" id="accountholder" name="accountholder" class="form-control form-control-sm" placeholder="Enter Account Holder Name">
+        </div>
+        <div class="form-label-group">
+            <label for="accountnumber" class="form-label">Account Number:</label>
+            <input type="text" id="accountnumber" name="accountnumber" class="form-control form-control-sm" placeholder="Enter account number">
+        </div>
+    </div>
+                </div>
+
+            </div>
+        </div>
+<div class="col-md-3">
+
+</div>
+        </div>
+    <div id="upiIdField" class="row mb-3" style="display:none;">
+        <div class="col-md-6 form-label-group">
+            <label for="upiId" class="form-label">UPI ID:</label>
+            <input type="text" id="upiId" name="upiId" class="form-control form-control-sm" placeholder="Enter UPI ID">
+        </div>
+    </div>
+
+    <div id="phonepayField" class="row mb-3" style="display:none;">
+        <div class="col-md-6 form-label-group">
+            <label for="transactionId" class="form-label">Transaction ID:</label>
+            <input type="text" id="transactionId" name="transactionId" class="form-control form-control-sm" placeholder="Enter Transaction ID">
+        </div>
+    </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+        </form>
+    </div>
+<script>
+    function showCoachDatalist() {
+    const input = document.getElementById('coachname');
+    const datalist = document.getElementById('coach_name');
+
+    if (input.value.length >= 2) {
+        fetch(`/get_coach_name?query=${encodeURIComponent(input.value)}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Fetched data:', data); // Debugging: Check the data in the console
+                datalist.innerHTML = ''; // Clear previous options
+
+                if (Array.isArray(data) && data.length > 0) {
+                    data.forEach(number => {
+                        const option = document.createElement('option');
+                        option.value = number;
+                        datalist.appendChild(option);
+                    });
+                } else {
+                    const option = document.createElement('option');
+                    option.value = 'No results';
+                    datalist.appendChild(option);
+                }
+            })
+            .catch(error => console.error('Error fetching vehicle numbers:', error));
+    } else {
+        datalist.innerHTML = ''; // Clear the datalist if fewer than 2 characters
+    }
+}
+
+// New function to fetch sender details when a name is selected
+function fetchCoachDetails() {
+    const coachname = document.getElementById('coachname').value;
+
+    if (coachname) {
+        fetch(`/get_coach_details?name=${encodeURIComponent(coachname)}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Fetched sender details:', data); // Debugging: Check the data in the console
+
+                // Populate the form fields with the fetched data
+                document.getElementById('coachType').value = data.coachType || '';
+                           })
+            .catch(error => console.error('Error fetching sender details:', error));
+    }
+}
+</script>
+    <script>
+        function calculateAge() {
+            const dob = document.getElementById('dob').value;
+            if (dob) {
+                const today = new Date();
+                const birthDate = new Date(dob);
+                let age = today.getFullYear() - birthDate.getFullYear();
+                const m = today.getMonth() - birthDate.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+                document.getElementById('age').value = age;
+            }
+        }
+    </script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const packageInputs = document.querySelectorAll('input[name="package"]');
+    const sessionsOptions = document.getElementById("sessionsOptions");
+    const totalAmountInput = document.getElementById("totalAmount");
+    const paymentInput = document.getElementById("payment");
+    const balanceInput = document.getElementById("balance");
+    const registrationFeeRow = document.getElementById("registrationFeeSection");
+    const registrationFeeInput = document.getElementById("registration_fee");
+
+    function updateTotalAmount() {
+        const selectedPackage = document.querySelector('input[name="package"]:checked');
+        const selectedSession = document.querySelector('input[name="sessions"]:checked');
+
+        if (selectedPackage && selectedSession) {
+            const packageValue = selectedPackage.value;
+            const sessionValue = selectedSession.value;
+
+            // Dummy pricing logic based on package and session
+            const prices = {
+                monthly: { weekly_2: 2900, weekly_3: 3900, weekly_6: 4900 },
+                quarterly: { weekly_2: 6900, weekly_3: 7900, weekly_6: 8900 },
+                half_yearly: { weekly_2: 12900, weekly_3: 14900, weekly_6: 16900 },
+                yearly: { weekly_2: 22900, weekly_3: 25900, weekly_6: 29900 }
+            };
+
+            let totalAmount = prices[packageValue][sessionValue];
+
+            // Add registration fee to the total amount if entered
+            const registrationFee = parseFloat(registrationFeeInput.value) || 0;
+            totalAmount += registrationFee;
+
+            totalAmountInput.value = totalAmount;
+
+            // Update balance if payment amount is entered
+            const paymentAmount = parseFloat(paymentInput.value) || 0;
+            balanceInput.value = totalAmount - paymentAmount;
+        }
+    }
+
+    function toggleRegistrationFee() {
+        const selectedPackage = document.querySelector('input[name="package"]:checked');
+
+        if (selectedPackage && selectedPackage.value === "monthly") {
+            registrationFeeRow.style.display = "block";
+            registrationFeeInput.disabled = false;  // Enable the input field for "Registration Fee"
+            registrationFeeInput.value = '';  // Reset the value for the user to enter
+        } else {
+            registrationFeeRow.style.display = "none";
+            registrationFeeInput.disabled = true;  // Disable the input field for "Registration Fee"
+            registrationFeeInput.value = '';  // Reset the value when it's hidden
+        }
+    }
+
+    packageInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            sessionsOptions.style.display = "block";
+            updateTotalAmount();
+            toggleRegistrationFee();  // Show/hide registration fee
+        });
+    });
+
+    const sessionInputs = document.querySelectorAll('input[name="sessions"]');
+    sessionInputs.forEach(input => {
+        input.addEventListener('change', updateTotalAmount);
+    });
+
+    paymentInput.addEventListener('input', function() {
+        const totalAmount = parseFloat(totalAmountInput.value) || 0;
+        const payment = parseFloat(this.value) || 0;
+        balanceInput.value = totalAmount - payment;
+    });
+
+    registrationFeeInput.addEventListener('input', updateTotalAmount); // Ensure registration fee is added to total when changed
+});
+</script>
+
+
+ <script>
+    function togglePaymentDetails() {
+        const paymentMode = document.getElementById('paymentMode').value;
+        const paymentDetails = document.getElementById('paymentDetails');
+        const bankTransferFields = document.getElementById('bankTransferFields');
+        const upiIdField = document.getElementById('upiIdField');
+        const phonepayField = document.getElementById('phonepayField');
+
+        // Hide all payment detail fields by default
+        paymentDetails.style.display = 'none';
+        bankTransferFields.style.display = 'none';
+        upiIdField.style.display = 'none';
+        phonepayField.style.display = 'none';
+
+        // Show relevant fields based on payment mode
+        if (paymentMode === 'bank_transfer') {
+            bankTransferFields.style.display = 'block';
+            paymentDetails.style.display = 'block';
+        } else if (paymentMode === 'upi') {
+            upiIdField.style.display = 'block';
+            paymentDetails.style.display = 'block';
+        } else if (paymentMode === 'phonepay') {
+            phonepayField.style.display = 'block';
+            paymentDetails.style.display = 'block';
+        } else if (paymentMode === 'cash') {
+            paymentDetails.style.display = 'block';
+        }
+    }
+</script>
+ <script>
+        function showEnquiryDatalist() {
+    const input = document.getElementById('name');
+    const datalist = document.getElementById('enquiry_name');
+
+    if (input.value.length >= 2) {
+        fetch(`/get_enquiry_name?query=${encodeURIComponent(input.value)}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Fetched data:', data); // Debugging: Check the data in the console
+                datalist.innerHTML = ''; // Clear previous options
+
+                if (Array.isArray(data) && data.length > 0) {
+                    data.forEach(number => {
+                        const option = document.createElement('option');
+                        option.value = number;
+                        datalist.appendChild(option);
+                    });
+                } else {
+                    const option = document.createElement('option');
+                    option.value = 'No results';
+                    datalist.appendChild(option);
+                }
+            })
+            .catch(error => console.error('Error fetching vehicle numbers:', error));
+    } else {
+        datalist.innerHTML = ''; // Clear the datalist if fewer than 2 characters
+    }
+}
+// New function to fetch sender details when a name is selected
+function fetchEnquiryDetails() {
+    const name = document.getElementById('name').value;
+
+    if (name) {
+        fetch(`/get_enquiry_details?name=${encodeURIComponent(name)}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Fetched enquiry details:', data); // Debugging: Check the data in the console
+
+                // Populate the form fields with the fetched data
+                document.getElementById('dob').value = data.date_of_birth || '';
+                document.getElementById('age').value = data.age || '';
+                document.getElementById('gender').value = data.gender || '';
+                document.getElementById('phone').value = data.contact_no || '';
+                document.getElementById('parentName').value = data.parent_name || '';
+                document.getElementById('mobile').value = data.parent_mobile_no || '';
+                document.getElementById('place').value = data.place || '';
+                document.getElementById('email').value = data.email || '';
+
+            })
+            .catch(error => console.error('Error fetching sender details:', error));
+    }
+}
+    </script>
+</body>
+</html>
